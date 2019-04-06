@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/rthandavan/aads-demo-quickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/rthandavan/aads-demo-quickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: aads-demo-quickstart
+        chartPath: charts/aads-demo-quickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/rthandavan/aads-demo-quickstart'
+          image.tag: '{{.DIGEST_HEX}}'
